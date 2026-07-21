@@ -161,8 +161,9 @@ export function CloudStudyWorkspace() {
 
   return <main className="study-shell">
     <header className="study-nav">
-      <a className="brand" href="/"><span className="mark">DS</span> Danish SDE</a>
+      <a className="brand" href="/"><span className="mark">DS</span> Danish SDE Sheet</a>
       <div className="nav-actions">
+        <a className="text-button landing-link" href="/">← Landing page</a>
         <span className={`sync-state ${session ? "synced" : "local"}`}><Cloud size={15} /> {session ? "Cloud synced" : "On this device"}</span>
         {session ? <button className="text-button" onClick={signOut}><LogOut size={15} /> Sign out</button> : <button className="button compact" onClick={() => setAuthOpen(true)}><LogIn size={15} /> Sign in to sync</button>}
       </div>

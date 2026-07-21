@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Danish SDE — Pattern-first interview prep",
+  title: "Danish SDE Sheet — Pattern-first interview prep",
   description: "A pattern-first DSA practice product for coding interviews.",
 };
 
