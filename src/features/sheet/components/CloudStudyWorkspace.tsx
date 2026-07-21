@@ -15,6 +15,14 @@ const grades: { grade: RecallGrade; label: string; hint: string; className: stri
   { grade: "easy", label: "Easy", hint: "Make a bigger jump", className: "easy" },
 ];
 
+const motivationalQuotes = [
+  { quote: "Every question you solve is one less surprise on interview day.", author: "Build familiarity, one pattern at a time." },
+  { quote: "Consistency beats intensity when the goal is deep recall.", author: "Show up for today’s one good solve." },
+  { quote: "Don’t memorise answers. Learn to recognise the signal.", author: "Patterns turn pressure into clarity." },
+  { quote: "A hard problem is just a future familiar pattern.", author: "Stay with it a little longer." },
+  { quote: "Small daily reps become calm confidence in the room.", author: "Your future self is practising with you." },
+];
+
 function startOfToday() {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
@@ -158,6 +166,7 @@ export function CloudStudyWorkspace() {
 
   const nextReview = stats.due[0] ?? stats.upcoming[0];
   const completion = Math.min(100, Math.round((stats.solved / 191) * 100));
+  const dailyQuote = motivationalQuotes[new Date().getDate() % motivationalQuotes.length];
 
   return <main className="study-shell">
     <header className="study-nav">
@@ -180,12 +189,14 @@ export function CloudStudyWorkspace() {
       <article className="mission-card"><div className="card-icon purple"><Target size={20} /></div><div><p className="card-label">SDE sheet progress</p><h2>{stats.solved} / 191 solved</h2><p>{completion}% complete · RB pattern order intact.</p></div><div className="progress-orb" style={{ "--progress": `${completion * 3.6}deg` } as React.CSSProperties}><span>{completion}%</span></div></article>
     </section>
 
+    <aside className="motivation-corner" aria-label="Daily motivation"><div className="motivation-icon"><Sparkles size={17} /></div><div><p className="card-label">Daily spark</p><blockquote>“{dailyQuote.quote}”</blockquote><p>{dailyQuote.author}</p></div></aside>
+
     {message && <p className="study-message" role="status">{message}</p>}
     {!isSupabaseConfigured && <section className="setup-banner"><Cloud size={19} /><div><strong>Cloud sync is ready to connect.</strong><span>Add your Supabase Project URL and publishable key to <code>.env.local</code>, run the included schema, then restart the app.</span></div></section>}
 
     {session && <section id="review" className="recall-panel"><div className="recall-heading"><div><p className="eyebrow">Memory gym</p><h2>Recall before you reveal the solution.</h2><p>Try to state the pattern, complexity, and key edge case out loud. Then grade the retrieval honestly.</p></div><span>{stats.due.length} due</span></div>{stats.due.length > 0 ? <div className="recall-list">{stats.due.map((record) => <article className="recall-item" key={record.question_id}><div><span className="review-kicker">{record.interval_days || 1}-day interval · {record.review_count} completed recalls</span><h3>{record.question_title}</h3><p>Can you explain the approach without opening notes?</p></div><div className="grade-buttons">{grades.map(({ grade, label, hint, className }) => <button key={grade} className={className} onClick={() => review(record, grade)}><b>{label}</b><small>{hint}</small></button>)}</div></article>)}</div> : <div className="empty-recall">No review is due right now.{nextReview ? ` Your next recall is ${dateLabel(nextReview.next_review_at).toLowerCase()} — ${nextReview.question_title}.` : " Solve a question below; it will come back tomorrow for its first memory check."}</div>}</section>}
 
-    <section id="tracker" className="tracker-section"><div className="tracker-heading"><div><p className="eyebrow">Complete practice library</p><h2>All 191 Striver questions, mapped into the RB pattern vocabulary.</h2></div><span>{loading ? "Loading progress…" : session ? "Changes sync automatically" : "Works offline; sign in to sync"}</span></div><iframe ref={frame} onLoad={() => hydrateTracker(records)} className="cloud-sheet" title="Danish SDE complete tracker" src="/tracker?embed=1" /></section>
+    <section id="tracker" className="tracker-section"><div className="tracker-heading"><div><p className="eyebrow">Complete practice library</p><h2>Solve with intent. Recognise the pattern. Walk into interviews ready.</h2></div><span>{loading ? "Loading progress…" : session ? "Changes sync automatically" : "Works offline; sign in to sync"}</span></div><iframe ref={frame} onLoad={() => hydrateTracker(records)} className="cloud-sheet" title="Danish SDE complete tracker" src="/tracker?embed=1" /></section>
 
     {authOpen && <div className="auth-backdrop" role="presentation" onMouseDown={() => setAuthOpen(false)}><section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={(event) => event.stopPropagation()}><div className="auth-logo"><Cloud size={18} /></div><p className="eyebrow">Cloud study profile</p><h2 id="auth-title">Keep your progress forever.</h2><p>Use a passwordless magic link. Your solves, review intervals, XP, and streak data stay attached to your own account.</p>{isSupabaseConfigured ? <form onSubmit={sendMagicLink}><label>Email address<input value={email} onChange={(event) => { setEmail(event.target.value); setAuthMessage(""); }} type="email" placeholder="you@example.com" required autoFocus /></label><button className="button" type="submit">Email me a secure link</button>{authMessage && <p className="auth-status" role="status">{authMessage}</p>}</form> : <p className="config-note">This app still needs its Supabase Project URL in <code>.env.local</code> before sign-in can be enabled.</p>}<button className="dialog-close" onClick={() => setAuthOpen(false)}>Maybe later</button></section></div>}
   </main>;
