@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { Award, BookOpenCheck, CalendarClock, Check, Cloud, Flame, LogIn, LogOut, Sparkles, Target } from "lucide-react";
@@ -189,7 +190,7 @@ export function CloudStudyWorkspace() {
       <article className="mission-card"><div className="card-icon purple"><Target size={20} /></div><div><p className="card-label">SDE sheet progress</p><h2>{stats.solved} / 191 solved</h2><p>{completion}% complete · RB pattern order intact.</p></div><div className="progress-orb" style={{ "--progress": `${completion * 3.6}deg` } as React.CSSProperties}><span>{completion}%</span></div></article>
     </section>
 
-    <aside className="motivation-corner" aria-label="Daily motivation"><div className="motivation-icon"><Sparkles size={17} /></div><div><p className="card-label">Daily spark</p><blockquote>“{dailyQuote.quote}”</blockquote><p>{dailyQuote.author}</p></div></aside>
+    <aside className="motivation-corner" aria-label="Daily motivation"><div className="motivation-frame"><Image src="/images/daily-spark-circuit-brain.png" alt="Circuit brain with code brackets and a golden spark" width={112} height={112} priority /></div><div><p className="card-label">Daily spark</p><blockquote>“{dailyQuote.quote}”</blockquote><p>{dailyQuote.author}</p></div></aside>
 
     {message && <p className="study-message" role="status">{message}</p>}
     {!isSupabaseConfigured && <section className="setup-banner"><Cloud size={19} /><div><strong>Cloud sync is ready to connect.</strong><span>Add your Supabase Project URL and publishable key to <code>.env.local</code>, run the included schema, then restart the app.</span></div></section>}
