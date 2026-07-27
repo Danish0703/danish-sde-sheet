@@ -670,10 +670,19 @@
     selectedPattern = name;
     savedOnly = false;
     render();
-    const sec = document.querySelector('.section');
-    if (sec) {
-      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    const patIndex = data.findIndex(p => p.name === name) + 1;
+    setTimeout(() => {
+      const targetSec = patIndex > 0 ? (document.getElementById('pattern-' + patIndex) || document.querySelector('.section')) : null;
+      if (targetSec) {
+        const pl = targetSec.querySelector('.problems-list');
+        const chev = targetSec.querySelector('.chev');
+        if (pl) pl.classList.add('open');
+        if (chev) chev.classList.add('open');
+        targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 20);
   }
 
   function lcUrl(title) {
