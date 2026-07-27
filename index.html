@@ -654,14 +654,26 @@
 
   function renderNav() {
     const names = ['All patterns', ...data.map(p => p.name)];
-    document.getElementById('topicNav').innerHTML = names.map(name => {
+    document.getElementById('topicNav').innerHTML = names.map((name, i) => {
       const items = name === 'All patterns'
         ? data.flatMap(p => p.problems)
         : (data.find(p => p.name === name)?.problems || []);
       const [d, n] = counts(items);
-      const label = name.length > 32 ? name.slice(0, 30) + '…' : name;
-      return `<button class="navitem ${selectedPattern===name?'active':''}" onclick="selectedPattern=${JSON.stringify(name)};savedOnly=false;render()"><span>${label}</span><span class="navcount">${d}/${n}</span></button>`;
+      const prefix = i === 0 ? '' : `${i}. `;
+      const rawText = prefix + name;
+      const label = rawText.length > 32 ? rawText.slice(0, 30) + '…' : rawText;
+      return `<button class="navitem ${selectedPattern===name?'active':''}" onclick="selectPattern(${JSON.stringify(name)})"><span>${label}</span><span class="navcount">${d}/${n}</span></button>`;
     }).join('');
+  }
+
+  function selectPattern(name) {
+    selectedPattern = name;
+    savedOnly = false;
+    render();
+    const sec = document.querySelector('.section');
+    if (sec) {
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   function lcUrl(title) {
@@ -691,18 +703,20 @@
       const [done, total] = counts(problems);
       const [allDone]     = counts(pat.problems);
       const meta = patternMeta[pat.name] || {icon:'◉', col:'var(--mint)'};
+      const patIndex = data.findIndex(p => p.name === pat.name) + 1;
+      const isOpen = selectedPattern !== 'All patterns' || term !== '' || diff !== 'all' || status !== 'all' || savedOnly;
 
-      out += `<article class="section">
+      out += `<article class="section" id="pattern-${patIndex}">
         <div class="section-top" onclick="const pl=this.nextElementSibling;pl.classList.toggle('open');this.querySelector('.chev').classList.toggle('open')">
           <div class="topic-icon" style="background:${meta.col}">${meta.icon}</div>
           <div class="section-title">
-            <h3>${pat.name}</h3>
+            <h3>${patIndex > 0 ? patIndex + '. ' : ''}${pat.name}</h3>
             <p>${pat.problems.length} problems · ${allDone}/${pat.problems.length} solved</p>
           </div>
           <span class="section-pct">${done}/${total}</span>
-          <span class="chev">⌄</span>
+          <span class="chev ${isOpen ? 'open' : ''}">⌄</span>
         </div>
-        <div class="problems-list">
+        <div class="problems-list ${isOpen ? 'open' : ''}">
           ${problems.map(q => {
             const url  = lcUrl(q.title);
             const slug = lc[q.title];
