@@ -5,6 +5,8 @@
 @media(max-width:900px){.study-shell{padding:18px}.study-hero{grid-template-columns:1fr;padding-top:45px;gap:25px}.xp-card{max-width:430px}.mission-grid{grid-template-columns:1fr}.mission-card{min-height:125px}.grade-buttons{min-width:0}.recall-item{display:block}.grade-buttons{margin-top:16px}.cloud-sheet{height:980px}}@media(max-width:570px){.study-nav{align-items:flex-start;padding-bottom:11px}.nav-actions{gap:0}.sync-state{display:none}.study-hero h1{font-size:43px}.hero-actions{align-items:flex-start;flex-direction:column}.grade-buttons{grid-template-columns:repeat(2,1fr)}.tracker-heading{display:block}.tracker-heading>span{display:block;margin-top:8px}.cloud-sheet{height:930px}.study-shell .brand{font-size:14px}.study-nav .text-button{font-size:11px}.mission-card{padding:16px}}
 /* Inline magic-link feedback must stay visible while the sign-in dialog is open. */
 .auth-status{margin:11px 0 0!important;padding:9px 10px;border-radius:8px;background:#edf8f0;color:#206443;font-size:11px!important;line-height:1.45!important}
+.google-auth-wrapper{display:flex;justify-content:center;width:100%;min-height:44px}
+.google-btn-container{width:100%;display:flex;justify-content:center}
 .google-auth-button{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f2937;border:1px solid var(--line);border-radius:11px;padding:12px 16px;font:800 13px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:all .2s ease}
 .google-auth-button:hover{background:#f8faf9;border-color:#b5c9bd;box-shadow:0 4px 12px rgba(16,35,30,.08);transform:translateY(-1px)}
 .google-auth-button:active{transform:translateY(0)}
