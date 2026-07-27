@@ -123,6 +123,20 @@ export function CloudStudyWorkspace() {
     return () => window.removeEventListener("message", handleMessage);
   }, [syncProgress]);
 
+  async function signInWithGoogle() {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    setAuthMessage("Redirecting to Google Sign-In…");
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, "");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${appUrl}/auth/callback?next=/sheet`,
+      },
+    });
+    if (error) setAuthMessage(error.message);
+  }
+
   async function sendMagicLink(event: React.FormEvent) {
     event.preventDefault();
     const supabase = getSupabaseClient();
@@ -199,6 +213,23 @@ export function CloudStudyWorkspace() {
 
     <section id="tracker" className="tracker-section"><div className="tracker-heading"><div><p className="eyebrow">Complete practice library</p><h2>Solve with intent. Recognise the pattern. Walk into interviews ready.</h2></div><span>{loading ? "Loading progress…" : session ? "Changes sync automatically" : "Works offline; sign in to sync"}</span></div><iframe ref={frame} onLoad={() => hydrateTracker(records)} className="cloud-sheet" title="Danish SDE complete tracker" src="/tracker?embed=1" /></section>
 
-    {authOpen && <div className="auth-backdrop" role="presentation" onMouseDown={() => setAuthOpen(false)}><section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={(event) => event.stopPropagation()}><div className="auth-logo"><Cloud size={18} /></div><p className="eyebrow">Cloud study profile</p><h2 id="auth-title">Keep your progress forever.</h2><p>Use a passwordless magic link. Your solves, review intervals, XP, and streak data stay attached to your own account.</p>{isSupabaseConfigured ? <form onSubmit={sendMagicLink}><label>Email address<input value={email} onChange={(event) => { setEmail(event.target.value); setAuthMessage(""); }} type="email" placeholder="you@example.com" required autoFocus /></label><button className="button" type="submit">Email me a secure link</button>{authMessage && <p className="auth-status" role="status">{authMessage}</p>}</form> : <p className="config-note">This app still needs its Supabase Project URL in <code>.env.local</code> before sign-in can be enabled.</p>}<button className="dialog-close" onClick={() => setAuthOpen(false)}>Maybe later</button></section></div>}
+    {authOpen && <div className="auth-backdrop" role="presentation" onMouseDown={() => setAuthOpen(false)}><section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={(event) => event.stopPropagation()}><div className="auth-logo"><Cloud size={18} /></div><p className="eyebrow">Cloud study profile</p><h2 id="auth-title">Keep your progress forever.</h2><p>Sign in to sync your solves, review intervals, XP, and streak data seamlessly across devices.</p>{isSupabaseConfigured ? <>
+      <button className="google-auth-button" onClick={signInWithGoogle} type="button">
+        <svg className="google-icon" viewBox="0 0 24 24" width="18" height="18">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div className="auth-divider">
+        <span>or passwordless email</span>
+      </div>
+
+      <form onSubmit={sendMagicLink}><label>Email address<input value={email} onChange={(event) => { setEmail(event.target.value); setAuthMessage(""); }} type="email" placeholder="you@example.com" required autoFocus /></label><button className="button" type="submit">Email me a secure link</button></form>
+      {authMessage && <p className="auth-status" role="status">{authMessage}</p>}
+    </> : <p className="config-note">This app still needs its Supabase Project URL in <code>.env.local</code> before sign-in can be enabled.</p>}<button className="dialog-close" onClick={() => setAuthOpen(false)}>Maybe later</button></section></div>}
   </main>;
 }
