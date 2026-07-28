@@ -673,21 +673,6 @@
     if (window.parent !== window) {
       window.parent.postMessage({ source: 'danish-sde-sheet', type: 'selectPattern', name }, window.location.origin);
     }
-    if (name === 'All patterns') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const patIndex = data.findIndex(p => p.name === name) + 1;
-      setTimeout(() => {
-        const targetSec = document.getElementById('pattern-' + patIndex);
-        if (targetSec) {
-          const pl = targetSec.querySelector('.problems-list');
-          const chev = targetSec.querySelector('.chev');
-          if (pl) pl.classList.add('open');
-          if (chev) chev.classList.add('open');
-          targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 30);
-    }
   }
 
   function lcUrl(title) {
@@ -702,7 +687,8 @@
     let visible  = 0;
     let out      = '';
 
-    const patterns = data;
+    const isAll = selectedPattern === 'All patterns';
+    const patterns = isAll ? data : data.filter(p => p.name === selectedPattern);
 
     patterns.forEach((pat) => {
       const problems = pat.problems.filter(q =>
@@ -718,7 +704,7 @@
       const [allDone]     = counts(pat.problems);
       const meta = patternMeta[pat.name] || {icon:'◉', col:'var(--mint)'};
       const patIndex = data.findIndex(p => p.name === pat.name) + 1;
-      const isOpen = (selectedPattern !== 'All patterns' && selectedPattern === pat.name) || term !== '' || diff !== 'all' || status !== 'all' || savedOnly;
+      const isOpen = !isAll || term !== '' || diff !== 'all' || status !== 'all' || savedOnly;
 
       out += `<article class="section" id="pattern-${patIndex}">
         <div class="section-top" onclick="const pl=this.nextElementSibling;pl.classList.toggle('open');this.querySelector('.chev').classList.toggle('open')">
@@ -760,8 +746,18 @@
     document.getElementById('sideCount').textContent     = `${solved.size} / ${all.length}`;
     document.getElementById('sideFill').style.width      = `${solved.size / all.length * 100}%`;
     renderNav();
-    document.getElementById('sheetTitle').textContent = savedOnly ? 'Saved problems'  : 'Pattern-wise sheet';
-    document.getElementById('sheetSub').textContent   = savedOnly ? 'Your saved questions.' : 'Recognise the pattern before the code. 191 Striver SDE problems organized for deep interview recall.';
+
+    if (savedOnly) {
+      document.getElementById('sheetTitle').textContent = 'Saved problems';
+      document.getElementById('sheetSub').textContent   = 'Your saved questions.';
+    } else if (isAll) {
+      document.getElementById('sheetTitle').textContent = 'Pattern-wise sheet';
+      document.getElementById('sheetSub').textContent   = 'Recognise the pattern before the code. 191 Striver SDE problems organized for deep interview recall.';
+    } else {
+      const selectedIdx = data.findIndex(p => p.name === selectedPattern) + 1;
+      document.getElementById('sheetTitle').textContent = `${selectedIdx}. ${selectedPattern}`;
+      document.getElementById('sheetSub').textContent   = `Pattern ${selectedIdx} of 33 — ${visible} questions in this pattern.`;
+    }
   }
 
   function showBookmarks(el) {
