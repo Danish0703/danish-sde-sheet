@@ -638,12 +638,22 @@
     localStorage.setItem('danish-sde-saved',  JSON.stringify([...saved]));
   }
 
+  function safePostMessage(payload) {
+    try {
+      if (window.parent && window.parent !== window && typeof window.parent.postMessage === 'function') {
+        window.parent.postMessage(payload, '*');
+      }
+    } catch (e) {
+      // Ignore cross-origin postMessage errors
+    }
+  }
+
   function toggle(id) {
     solved.has(id) ? solved.delete(id) : solved.add(id);
     persist();
     const q = data.flatMap(p => p.problems).find(x => x.id === id);
-    if (q && window.parent !== window) {
-      window.parent.postMessage({ source:'danish-sde-sheet', type:'progress', id, title:q.title, solved:solved.has(id) }, window.location.origin);
+    if (q) {
+      safePostMessage({ source: 'danish-sde-sheet', type: 'progress', id, title: q.title, solved: solved.has(id) });
     }
     render();
   }
@@ -654,7 +664,9 @@
 
   function renderNav() {
     const names = ['All patterns', ...data.map(p => p.name)];
-    document.getElementById('topicNav').innerHTML = names.map((name, i) => {
+    const topicNavEl = document.getElementById('topicNav');
+    if (!topicNavEl) return;
+    topicNavEl.innerHTML = names.map((name, i) => {
       const items = name === 'All patterns'
         ? data.flatMap(p => p.problems)
         : (data.find(p => p.name === name)?.problems || []);
@@ -662,7 +674,7 @@
       const prefix = i === 0 ? '' : `${i}. `;
       const rawText = prefix + name;
       const label = rawText.length > 32 ? rawText.slice(0, 30) + '…' : rawText;
-      return `<button class="navitem ${selectedPattern===name?'active':''}" onclick="selectPattern(${JSON.stringify(name)})"><span>${label}</span><span class="navcount">${d}/${n}</span></button>`;
+      return `<button class="navitem ${selectedPattern===name?'active':''}" data-name="${name.replace(/"/g, '&quot;')}" onclick="selectPattern(${JSON.stringify(name)})"><span>${label}</span><span class="navcount">${d}/${n}</span></button>`;
     }).join('');
   }
 
@@ -670,10 +682,16 @@
     selectedPattern = name;
     savedOnly = false;
     render();
-    if (window.parent !== window) {
-      window.parent.postMessage({ source: 'danish-sde-sheet', type: 'selectPattern', name }, window.location.origin);
-    }
+    safePostMessage({ source: 'danish-sde-sheet', type: 'selectPattern', name });
   }
+
+  window.selectPattern = selectPattern;
+  window.toggle = toggle;
+  window.star = star;
+  window.showBookmarks = showBookmarks;
+  window.resetProgress = resetProgress;
+  window.openFirst = openFirst;
+  window.render = render;
 
   function lcUrl(title) {
     const slug = lc[title];
@@ -777,6 +795,13 @@
   window.addEventListener('message', ev => {
     if (ev.origin !== window.location.origin || ev.data?.source !== 'danish-sde-app' || ev.data.type !== 'hydrate') return;
     solved.clear(); (ev.data.solved || []).forEach(id => solved.add(id)); persist(); render();
+  });
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.navitem');
+    if (btn && btn.dataset && btn.dataset.name) {
+      selectPattern(btn.dataset.name);
+    }
   });
 
   document.addEventListener('keydown', e => {
