@@ -670,19 +670,17 @@
     selectedPattern = name;
     savedOnly = false;
     render();
-    const patIndex = data.findIndex(p => p.name === name) + 1;
-    setTimeout(() => {
-      const targetSec = patIndex > 0 ? (document.getElementById('pattern-' + patIndex) || document.querySelector('.section')) : null;
-      if (targetSec) {
-        const pl = targetSec.querySelector('.problems-list');
-        const chev = targetSec.querySelector('.chev');
-        if (pl) pl.classList.add('open');
-        if (chev) chev.classList.add('open');
-        targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 20);
+    if (name === 'All patterns') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const patIndex = data.findIndex(p => p.name === name) + 1;
+      setTimeout(() => {
+        const targetSec = document.getElementById('pattern-' + patIndex);
+        if (targetSec) {
+          targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 30);
+    }
   }
 
   function lcUrl(title) {
@@ -697,7 +695,7 @@
     let visible  = 0;
     let out      = '';
 
-    const patterns = selectedPattern === 'All patterns' ? data : data.filter(p => p.name === selectedPattern);
+    const patterns = data;
 
     patterns.forEach((pat) => {
       const problems = pat.problems.filter(q =>
@@ -713,7 +711,7 @@
       const [allDone]     = counts(pat.problems);
       const meta = patternMeta[pat.name] || {icon:'◉', col:'var(--mint)'};
       const patIndex = data.findIndex(p => p.name === pat.name) + 1;
-      const isOpen = selectedPattern !== 'All patterns' || term !== '' || diff !== 'all' || status !== 'all' || savedOnly;
+      const isOpen = (selectedPattern !== 'All patterns' && selectedPattern === pat.name) || term !== '' || diff !== 'all' || status !== 'all' || savedOnly;
 
       out += `<article class="section" id="pattern-${patIndex}">
         <div class="section-top" onclick="const pl=this.nextElementSibling;pl.classList.toggle('open');this.querySelector('.chev').classList.toggle('open')">
