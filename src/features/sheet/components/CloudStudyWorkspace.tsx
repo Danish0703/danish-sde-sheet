@@ -140,9 +140,13 @@ export function CloudStudyWorkspace() {
   }, [records, session]);
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent<SheetMessage>) => {
-      if (event.origin !== window.location.origin || event.data?.source !== "danish-sde-sheet" || event.data.type !== "progress") return;
-      void syncProgress(event.data);
+    const handleMessage = (event: MessageEvent<SheetMessage | { source: "danish-sde-sheet"; type: "selectPattern"; name: string }>) => {
+      if (event.origin !== window.location.origin || event.data?.source !== "danish-sde-sheet") return;
+      if (event.data.type === "progress") {
+        void syncProgress(event.data);
+      } else if (event.data.type === "selectPattern") {
+        document.getElementById("tracker")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);

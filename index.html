@@ -670,6 +670,9 @@
     selectedPattern = name;
     savedOnly = false;
     render();
+    if (window.parent !== window) {
+      window.parent.postMessage({ source: 'danish-sde-sheet', type: 'selectPattern', name }, window.location.origin);
+    }
     if (name === 'All patterns') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -677,6 +680,10 @@
       setTimeout(() => {
         const targetSec = document.getElementById('pattern-' + patIndex);
         if (targetSec) {
+          const pl = targetSec.querySelector('.problems-list');
+          const chev = targetSec.querySelector('.chev');
+          if (pl) pl.classList.add('open');
+          if (chev) chev.classList.add('open');
           targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 30);
